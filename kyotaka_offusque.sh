@@ -3,21 +3,15 @@
 clear
 echo -e "\033[1;31m"
 echo "╔════════════════════════════════════╗"
-echo "║        𝙺𝚈𝙾𝚃𝙰𝙺𝙰 𝙾𝙵𝙵𝚄𝚂𝚀𝚄𝙴𝚁       ║"
+echo "║        𝙺𝚈𝙾𝚃𝙰𝙺𝙰 𝙲𝚁𝚈𝙿𝚃 𝙼𝙾𝙳𝙴        ║"
 echo "╚════════════════════════════════════╝"
 echo -e "\033[0m"
 
-read -p $'\033[1;36mQue veux-tu faire ? (offusque / desoffusque) > \033[0m' mode
-if [[ "$mode" != "offusque" && "$mode" != "desoffusque" ]]; then
-  echo -e "\033[1;31mChoix invalide. Stop.\033[0m"
-  exit 1
-fi
+read -p $'\033[1;36mMode ? (offusque/desoffusque) > \033[0m' mode
+[[ "$mode" != "offusque" && "$mode" != "desoffusque" ]] && echo -e "\033[1;31mInvalide.\033[0m" && exit 1
 
-read -p $'\033[1;36mType de code (js / css / html) > \033[0m' type
-if [[ "$type" != "js" && "$type" != "css" && "$type" != "html" ]]; then
-  echo -e "\033[1;31mType invalide. Stop.\033[0m"
-  exit 1
-fi
+read -p $'\033[1;36mType (js/css/html) > \033[0m' type
+[[ "$type" != "js" && "$type" != "css" && "$type" != "html" ]] && echo -e "\033[1;31mType invalide.\033[0m" && exit 1
 
 echo -e "\033[1;33mColle ton code, termine avec une ligne contenant uniquement : EOF\033[0m"
 
@@ -27,19 +21,16 @@ while IFS= read -r line; do
   code+="$line"$'\n'
 done
 
-filename="kyotaka_code_${mode}.${type}"
+mkdir -p /sdcard/KYOTAKA
+filename="kyotaka_${mode}.${type}"
+filepath="/sdcard/KYOTAKA/$filename"
 
 if [[ "$mode" == "offusque" ]]; then
   minified=$(echo "$code" | tr -d '\n\r\t' | sed 's/  */ /g' | sed 's/ *{ */{/g' | sed 's/ *} */}/g' | sed 's/ *; */;/g' | sed 's/ *, */,/g')
-  echo "$minified" | base64 > "$filename"
+  echo "$minified" | base64 > "$filepath"
 else
-  base64 -d "$filename" | fold -w 80 > "${filename}.decoded"
+  base64 -d <<< "$code" | fold -w 80 > "$filepath"
 fi
 
-echo -e "\033[1;32mTon code a été $mode avec succès !\033[0m"
-
-if [[ "$mode" == "offusque" ]]; then
-  echo -e "\033[1;32mVérifie le fichier $filename dans ton téléphone.\033[0m"
-else
-  echo -e "\033[1;32mVérifie le fichier ${filename}.decoded dans ton téléphone.\033[0m"
-fi
+echo -e "\033[1;32mCode $mode avec succès !\033[0m"
+echo -e "\033[1;32mFichier créé : $filepath\033[0m"
